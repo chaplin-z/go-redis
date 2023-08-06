@@ -15,7 +15,7 @@ func (cluster *ClusterDatabase) getPeerClient(peer string) (*client.Client, erro
 	if !ok {
 		return nil, errors.New("connection factory not found")
 	}
-	raw, err := factory.BorrowObject(context.Background()) //从连接池里获取一个
+	raw, err := factory.BorrowObject(context.Background()) //从连接池里获取这个地址的连接
 	if err != nil {
 		return nil, err
 	}

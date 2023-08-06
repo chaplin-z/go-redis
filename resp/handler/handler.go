@@ -27,7 +27,7 @@ var (
 
 // RespHandler implements tcp.Handler and serves as a redis handler
 type RespHandler struct {
-	activeConn sync.Map // *client -> placeholder
+	activeConn sync.Map // 协议层保存的所有连接
 	db         databaseface.Database
 	closing    atomic.Boolean // refusing new client and new request
 }

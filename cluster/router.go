@@ -10,7 +10,6 @@ func makeRouter() map[string]CmdFunc {
 	routerMap["ping"] = ping
 
 	routerMap["del"] = Del
-
 	routerMap["exists"] = defaultFunc
 	routerMap["type"] = defaultFunc
 	routerMap["rename"] = Rename

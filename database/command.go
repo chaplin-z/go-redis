@@ -8,7 +8,7 @@ var cmdTable = make(map[string]*command) //记录指令
 // 指令
 type command struct {
 	executor ExecFunc //方法，set，get等都要实现这个
-	arity    int      // 参数个数allow number of args, arity < 0 means len(args) >= -arity
+	arity    int      // 参数个数 allow number of args, arity < 0 means len(args) >= -arity
 }
 
 // RegisterCommand registers a new command

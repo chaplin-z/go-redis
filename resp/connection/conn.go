@@ -42,7 +42,7 @@ func (c *Connection) Write(b []byte) error {
 	if len(b) == 0 {
 		return nil
 	}
-	c.mu.Lock()
+	c.mu.Lock() //同一时刻只能有一个协程往客户端写数据
 	c.waitingReply.Add(1)
 	defer func() {
 		c.waitingReply.Done()

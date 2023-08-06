@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-// DB stores data and execute user's commands
+// DB stores data and execute user's commands 每个分数据库
 type DB struct {
 	index int
 	// key -> DataEntity
@@ -46,7 +46,7 @@ func (db *DB) Exec(c resp.Connection, cmdLine [][]byte) resp.Reply {
 		return reply.MakeArgNumErrReply(cmdName)
 	}
 	fun := cmd.executor         //对应指令的执行方法
-	return fun(db, cmdLine[1:]) //返回指令后面的
+	return fun(db, cmdLine[1:]) //传入指令后面，执行方法
 }
 
 func validateArity(arity int, cmdArgs [][]byte) bool {

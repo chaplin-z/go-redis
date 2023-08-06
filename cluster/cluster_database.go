@@ -32,7 +32,7 @@ func MakeClusterDatabase() *ClusterDatabase {
 	cluster := &ClusterDatabase{
 		self: config.Properties.Self,
 
-		db:             database.NewStandaloneDatabase(),
+		db:             database.NewStandaloneDatabase(), //用的单机db
 		peerPicker:     consistenthash.NewNodeMap(nil),
 		peerConnection: make(map[string]*pool.ObjectPool),
 	}

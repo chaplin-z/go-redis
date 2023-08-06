@@ -53,6 +53,7 @@ func NewAOFHandler(db databaseface.Database) (*AofHandler, error) {
 	handler.aofFile = aofFile
 	handler.aofChan = make(chan *payload, aofQueueSize)
 	handler.aofFinished = make(chan struct{})
+	// 开协程，一直从channel中取
 	go func() {
 		handler.handleAof()
 	}()
@@ -60,6 +61,7 @@ func NewAOFHandler(db databaseface.Database) (*AofHandler, error) {
 }
 
 // AddAof send command to aof goroutine through channel
+// payLoad(set k v)->aofChan，往channel里写数据
 func (handler *AofHandler) AddAof(dbIndex int, cmdLine CmdLine) {
 	if config.Properties.AppendOnly && handler.aofChan != nil {
 		handler.aofChan <- &payload{
@@ -69,13 +71,14 @@ func (handler *AofHandler) AddAof(dbIndex int, cmdLine CmdLine) {
 	}
 }
 
-// handleAof listen aof channel and write into file，取出channel的数据，写在磁盘里
+// handleAof listen aof channel and write into file
+// 取出channel的数据，写在磁盘里,每个客户端连接对应一个aof协程，所以要加锁，防止冲突
 func (handler *AofHandler) handleAof() {
 	// serialized execution
 	handler.currentDB = 0
 	for p := range handler.aofChan {
-		handler.pausingAof.RLock()          // prevent other goroutines from pausing aof
-		if p.dbIndex != handler.currentDB { //如果切换了db
+		handler.pausingAof.RLock()          // 防止其他goroutine暂停aof
+		if p.dbIndex != handler.currentDB { // 如果切换了db
 			// select db
 			data := reply.MakeMultiBulkReply(utils.ToCmdLine("SELECT", strconv.Itoa(p.dbIndex))).ToBytes()
 			_, err := handler.aofFile.Write(data)

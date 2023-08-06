@@ -16,7 +16,7 @@ import (
 type StandaloneDatabase struct {
 	dbSet []*DB
 	// handle aof persistence
-	aofHandler *aof.AofHandler
+	aofHandler *aof.AofHandler //通过这个指针调用aof的addaof函数，往channel里写数据
 }
 
 // NewStandaloneDatabase creates a redis database,
