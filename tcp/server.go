@@ -71,6 +71,7 @@ func ListenAndServe(listener net.Listener, handler tcp.Handler, closeChan <-chan
 		// handle
 		logger.Info("accept link")
 		waitDone.Add(1)
+		//每有一个客户端连接，就创建一个协程，负责处理这个客户端
 		go func() {
 			defer func() {
 				waitDone.Done() //处理完一个客户端就减一

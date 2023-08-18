@@ -40,7 +40,7 @@ type AofHandler struct {
 	currentDB  int
 }
 
-// NewAOFHandler creates a new aof.AofHandler
+// NewAOFHandler creates a new aof.AofHandler 传的单机db
 func NewAOFHandler(db databaseface.Database) (*AofHandler, error) {
 	handler := &AofHandler{}
 	handler.aofFilename = config.Properties.AppendFilename
@@ -72,7 +72,7 @@ func (handler *AofHandler) AddAof(dbIndex int, cmdLine CmdLine) {
 }
 
 // handleAof listen aof channel and write into file
-// 取出channel的数据，写在磁盘里,每个客户端连接对应一个aof协程，所以要加锁，防止冲突
+// 取出channel的数据，写在磁盘里,每个客户端连接对应一个aof写协程，所以要加锁，防止冲突
 func (handler *AofHandler) handleAof() {
 	// serialized execution
 	handler.currentDB = 0

@@ -7,6 +7,7 @@ import (
 	"go-redis/resp/client"
 )
 
+// 实现了commons-pool连接池的接口，连接池里调用这个具体的实现方法
 type connectionFactory struct {
 	Peer string //连接的节点地址
 }
@@ -16,7 +17,7 @@ func (f *connectionFactory) MakeObject(ctx context.Context) (*pool.PooledObject,
 	if err != nil {
 		return nil, err
 	}
-	c.Start()
+	c.Start() //客户端连接
 	return pool.NewPooledObject(c), nil
 }
 

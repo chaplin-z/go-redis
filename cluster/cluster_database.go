@@ -23,8 +23,8 @@ type ClusterDatabase struct {
 
 	nodes          []string                    //整个集群的节点
 	peerPicker     *consistenthash.NodeMap     //节点的选择器
-	peerConnection map[string]*pool.ObjectPool //连接池，string是节点的地址，value是pool
-	db             databaseface.Database
+	peerConnection map[string]*pool.ObjectPool //连接池，string是另一节点的地址，value是pool
+	db             databaseface.Database       //单机的db
 }
 
 // MakeClusterDatabase creates and starts a node of cluster
@@ -32,8 +32,8 @@ func MakeClusterDatabase() *ClusterDatabase {
 	cluster := &ClusterDatabase{
 		self: config.Properties.Self,
 
-		db:             database.NewStandaloneDatabase(), //用的单机db
-		peerPicker:     consistenthash.NewNodeMap(nil),
+		db:             database.NewStandaloneDatabase(), //用的单机db，集群和单机其实共用db数组和aof结构体
+		peerPicker:     consistenthash.NewNodeMap(nil),   //一致性哈希，节点选择
 		peerConnection: make(map[string]*pool.ObjectPool),
 	}
 	nodes := make([]string, 0, len(config.Properties.Peers)+1)
@@ -41,8 +41,8 @@ func MakeClusterDatabase() *ClusterDatabase {
 		nodes = append(nodes, peer)
 	}
 	nodes = append(nodes, config.Properties.Self)
-	cluster.peerPicker.AddNode(nodes...)
-	ctx := context.Background() //空的
+	cluster.peerPicker.AddNode(nodes...) //添加集群节点
+	ctx := context.Background()          //空的
 	for _, peer := range config.Properties.Peers {
 		cluster.peerConnection[peer] = pool.NewObjectPoolWithDefaultConfig(ctx, &connectionFactory{
 			Peer: peer,

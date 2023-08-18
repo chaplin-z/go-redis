@@ -28,6 +28,6 @@ func makeRouter() map[string]CmdFunc {
 // relay command to responsible peer, and return its reply to client
 func defaultFunc(cluster *ClusterDatabase, c resp.Connection, args [][]byte) resp.Reply {
 	key := string(args[1])
-	peer := cluster.peerPicker.PickNode(key)
+	peer := cluster.peerPicker.PickNode(key) //判断集群节点
 	return cluster.relay(peer, c, args)
 }

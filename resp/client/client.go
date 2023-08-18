@@ -14,22 +14,22 @@ import (
 
 // Client is a pipeline mode redis client
 type Client struct {
-	conn        net.Conn
-	pendingReqs chan *request // wait to send
-	waitingReqs chan *request // waiting response
-	ticker      *time.Ticker
+	conn        net.Conn      // 与服务端的 tcp 连接
+	pendingReqs chan *request // 等待发送的请求
+	waitingReqs chan *request // 等待服务器响应的请求
+	ticker      *time.Ticker  //用于触发心跳包的计时器
 	addr        string
 
-	working *sync.WaitGroup // its counter presents unfinished requests(pending and waiting)
+	working *sync.WaitGroup // 有请求正在处理不能立即停止，用于实现 graceful shutdown
 }
 
 // request is a message sends to redis server
 type request struct {
-	id        uint64
-	args      [][]byte
-	reply     resp.Reply
-	heartbeat bool
-	waiting   *wait.Wait
+	id        uint64     // 请求id
+	args      [][]byte   // 上行参数
+	reply     resp.Reply // 上行参数
+	heartbeat bool       // 标记是否是心跳请求
+	waiting   *wait.Wait // 调用协程发送请求后通过 waitgroup 等待请求异步处理完成
 	err       error
 }
 
@@ -155,7 +155,7 @@ func (client *Client) doRequest(req *request) {
 	}
 	re := reply.MakeMultiBulkReply(req.args)
 	bytes := re.ToBytes()
-	_, err := client.conn.Write(bytes)
+	_, err := client.conn.Write(bytes) //发送到连接中
 	i := 0
 	for err != nil && i < 3 {
 		err = client.handleConnectionError(err)
@@ -189,6 +189,7 @@ func (client *Client) finishRequest(reply resp.Reply) {
 	}
 }
 
+// 读响应
 func (client *Client) handleRead() error {
 	ch := parser.ParseStream(client.conn)
 	for payload := range ch {
